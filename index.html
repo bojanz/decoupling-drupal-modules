@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+
+    <title>Decoupling Drupal modules into PHP libraries: a Commerce 2.x primer</title>
+
+    <meta name="author" content="Bojan Zivanovic">
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+
+    <link rel="stylesheet" href="css/reveal.min.css">
+    <link rel="stylesheet" href="css/theme/default.css" id="theme">
+    <link rel="stylesheet" href="assets/stylesheets/styles.css"> <!-- Just a few changes, not worth a whole theme. -->
+
+    <!-- For syntax highlighting -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <!-- If the query includes 'print-pdf', use the PDF print sheet -->
+    <script>
+      document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Customized Styles -->
+    <style type="text/css">
+      /* Shadows for all screenshot slides */
+      .shadowh2 h2,
+      .shadowh2 h1 {
+        padding: 30px;
+        background-color: rgba(0,0,0,0.7);
+        background-image: none;
+        border-radius: 20px;
+        border: 1px solid rgba(255,255,255,0.7);
+        box-shadow: 0 0 45px #000 inset;
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <div class="reveal">
+
+      <!-- Any section element inside of this container is displayed as a slide -->
+      <div class="slides">
+        <section data-background="assets/images/intro-slide.png">
+        </section>
+        <section data-background="assets/images/title-slide.png">
+        </section>
+
+        <section>
+          <section>
+            <img src="assets/images/bojan.jpg" />
+            <p>
+              Bojan Zivanovic <br />
+              Commerce Development Lead at <a href="http://commerceguys.com">Commerce Guys</a>
+            </p>
+          </section>
+
+          <section class="shadowh2" data-background="assets/images/commerce-guy.png">
+            <h2>Commerce Guys</h2>
+            <p><strong>Paris | London | Ann Arbor, MI</strong></p>
+            <p>Creators of Platform.sh and Drupal Commerce</p>
+
+            <aside class="notes">
+              We're a Drupal powered eCommerce company now headquartered in Paris with offices in London and Ann Arbor.
+              We formed the international company through a small merger in 2010 to create Drupal Commerce and Platform.sh.
+              We're now up to around 60 people, about 25% distributed, delivering a wide variety of projects across
+              North America and Europe.
+              <p>
+              Our story has always been based around solving the hard parts of eCommerce together; the first time
+              we ever cooperated as an international team, in fact, was to develop a new site for a global brand that
+              was multilingual, multi-currency, and with locale specific payment gateways and product availability.
+              It was hard. Very hard. We still see the ghost of that project wandering around our office. We were
+              still using Ubercart at the time and knew we needed to do better.
+              </p>
+
+              So we created Drupal Commerce!
+            </aside>
+          </section>
+        </section>
+
+        <section>
+            <section>
+                <img src="assets/images/dc.png" style="border: 0; padding: 15px;"  />
+            </section>
+            <section>
+              <h2>3.5 years since the first release...</h2>
+              <img src="assets/images/usage-stats.png" />
+            </section>
+            <section>
+              <h2>And now we start from scratch</h2>
+              <img src="assets/images/scratch.png" style="border:0" />
+            </section>
+            <section>
+              <h2>Re-evaluating our problem space</h2>
+              <img src="assets/images/umbrella.png" class="simple" />
+            </section>
+            <section>
+              <h2>Libraries first</h2>
+              <img src="assets/images/libraries.png" class="simple" />
+            </section>
+        </section>
+
+        <section>
+          <section>
+            <img src="assets/images/intl.png" style="margin-top:0" />
+            <img src="assets/images/cldr.png" class="simple" style="margin-top:0" />
+          </section>
+          <!--
+          <section>
+            <img src="assets/images/booking.png" class="simple" />
+            <h3>12.345,99 € / €12,345.99 / د.إ.‏ ٩٩٩٫٩٩ </h3>
+            <h3>
+          </section>
+          -->
+          <section>
+            <h2>Influencing symfony/intl</h2>
+            <img src="assets/images/symfony.png" class="simple" />
+          </section>
+
+        </section>
+
+        <section>
+          <section>
+            <img src="assets/images/addressing.png" />
+          </section>
+        <!--
+          <section>
+            <img src="assets/images/address-form.png" />
+          </section>
+        -->
+          <section>
+            <img src="assets/images/trending-developer.png" />
+            <img src="assets/images/usage-sylius.png" />
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <img src="assets/images/zone.png" />
+          </section>
+          <section>
+            <h2>Territorial groupings</h2>
+            <ul>
+              <li>California and Nevada</li>
+              <li>European Union</li>
+              <li>Germany and a set of Austrian postal codes (6691, 6991, 6992, 6993)</li>
+              <li>Austria without specific postal codes (6691, 6991, 6992, 6993)</li>
+            </ul>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <img src="assets/images/tax.png" />
+          </section>
+        <!--
+          <section>
+            <h2>Predefined tax rates</h2>
+            <img src="assets/images/europe-map.png" />
+          </section>
+          <section>
+            <h2>Pluggable resolvers, predefined logic</h2>
+            <ul>
+              <li>B2B / B2C</li>
+              <li>Physical / digital products</li>
+              <li>Tax registrations in additional countries</li>
+              <li>Place of supply</li>
+            </ul>
+          </section>
+          -->
+          <section>
+            <h2>Coming to a SaaS near you</h2>
+            <img src="assets/images/usage-foxycart.png" class="simple" /> <br />
+            <img src="assets/images/usage-kong.png" class="simple" />
+          </section>
+        </section>
+
+        <section>
+          <h2>More to come</h2>
+          <img src="assets/images/pricing.png" class="simple" />
+        </section>
+
+        <section>
+          <h2>Why?</h2>
+          <ul>
+              <li class="fragment">Re-examine your problem space.</li>
+              <li class="fragment" style="margin-top:15px">Get additional exposure.</li>
+              <li class="fragment" style="margin-top:15px">Validate your implementation</li>
+              <li class="fragment" style="margin-top:15px">Get development/maintenance help.</li>
+              <li class="fragment" style="margin-top:15px">Allow for backports.</li>
+            </ul>
+        </section>
+
+        <section>
+          <h2>The (not so) hidden cost</h2>
+          <img src="assets/images/time.png" class="simple" />
+        </section>
+
+        <section>
+           <section>
+            <h2>The anatomy of a library</h2>
+            <img src="assets/images/skeleton.gif" class="simple" />
+          </section>
+
+          <section>
+            <h2> Data model - The basics</h2>
+            <img src="assets/images/currency.png" class="simple" />
+          </section>
+
+          <section>
+            <h2> Data model - Traits</h2>
+            <img src="assets/images/trait.png" class="simple" />
+          </section>
+
+          <section>
+            <h2> Data model - Collections</h2>
+            <img src="assets/images/subdivision_children.png" class="simple" style="margin:0" />
+            <img src="assets/images/doctrine_collections.png" class="simple" style="margin:0" />
+          </section>
+
+          <section>
+            <h2> Data model - Repository</h2>
+            <img src="assets/images/repository.png" class="simple" />
+          </section>
+
+          <section>
+            <h2> Services</h2>
+            <img src="assets/images/zone_matcher.png" class="simple" />
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2> Tips &amp; Tricks</h2>
+            <img src="assets/images/magic.png" class="simple" />
+            <aside class="notes">
+              Keep in mind that your library needs to feel native to users
+              of very different systems. For example: Drupal, a dynamic and introspective
+              configuration driven system and Symfony, a static, code driven system.
+              Know what developers from both platforms will expect.
+            </aside>
+          </section>
+
+          <section>
+            <h2>Translatable strings</h2>
+            <img src="assets/images/enum.png" class="simple" />
+          </section>
+
+          <section>
+            <h2>Pluggable implementations</h2>
+            <img src="assets/images/tax_resolver.png" class="simple" />
+            <img src="assets/images/core_constraint.png" class="simple" style="margin:0" />
+          </section>
+
+          <section>
+            <h2> Know when to stop! </h2>
+            <aside class="notes">
+              Some problems should be solved one level above, in the implementing
+              application. Do not be afraid of code duplication.
+            </aside>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>Library ideas: which problems to tackle</h2>
+          </section>
+
+          <section>
+            <h2>Hard problems</h2>
+            <img src="assets/images/hard-problems.png" class="simple" />
+            <aside class="notes">
+              Takes a lot of domain knowledge to get right. Others get it wrong.
+            </aside>
+          </section>
+
+          <section>
+            <h2>Boring problems</h2>
+            <img src="assets/images/boring.jpg" class="simple" />
+            <aside class="notes">
+              Takes a long time to get right (corner cases).
+            </aside>
+          </section>
+
+          <section>
+            <h2>Are you saving me time?</h2>
+            <br>
+            <p>Nobody cares about your CartInterface.</p>
+          </section>
+        </section>
+
+        <section>
+           <h2>Spreading the drop</h2>
+           <img src="assets/images/druplicon.png" class="simple" />
+           <aside class="notes">
+             Migrate. Views. Rendering and caching?
+           </aside>
+        </section>
+
+        <section>
+          <h2>Questions?</h2>
+        </section>
+
+        <section data-background="assets/images/feedback-slide.png">
+        </section>
+      </div>
+    </div>
+
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.min.js"></script>
+
+    <script>
+
+      // Full list of configuration options available here:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+
+        theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+        transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+        // Optional libraries used to extend on reveal.js
+        dependencies: [
+          { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+          { src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+          { src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+          // { src: 'plugin/search/search.js', async: true, condition: function() { return !!document.body.classList; } }
+          // { src: 'plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
+        ]
+      });
+
+    </script>
+
+  </body>
+</html>
